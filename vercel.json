@@ -1,16 +1,5 @@
 {
-  "routes": [
-    {
-      "src": "/sitemap.xml",
-      "dest": "/sitemap.xml"
-    },
-    {
-      "src": "/robots.txt",
-      "dest": "/robots.txt"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/"
-    }
+  "rewrites": [
+    { "source": "/about|/privacy-policy|/terms|/contact", "destination": "/" }
   ]
 }
