@@ -2,4 +2,14 @@
   "rewrites": [
     { "source": "/about|/privacy-policy|/terms|/contact", "destination": "/" }
   ]
+  {
+  "headers": [
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        { "key": "Content-Type", "value": "application/xml" }
+      ]
+    }
+  ]
+}
 }
