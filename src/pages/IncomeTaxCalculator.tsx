@@ -28,18 +28,6 @@ const TaxCalculator: React.FC = () => {
     setInputs({ annualIncome: num });
   };
 
-  const handleChange = (field: keyof TaxInputs, value: string) => {
-    if (value === '') {
-      setInputs(prev => ({ ...prev, [field]: '' as any }));
-      return;
-    }
-
-    const numValue = parseFloat(value);
-
-    if (!isNaN(numValue) && numValue >= 0) {
-      setInputs(prev => ({ ...prev, [field]: numValue }));
-    }
-  };
 
   const results = useMemo(() => {
     if (inputs.annualIncome === '') {
