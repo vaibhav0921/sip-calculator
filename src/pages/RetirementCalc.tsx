@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Calculator, TrendingUp, PieChart, Calendar, PiggyBank, BarChart3 } from 'lucide-react';
+import { Calculator, TrendingUp, PieChart, PiggyBank, BarChart3 } from 'lucide-react';
 
 interface RetirementInputs {
     currentAge: string;
