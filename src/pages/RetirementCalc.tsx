@@ -2,15 +2,16 @@ import React, { useState, useMemo } from 'react';
 import { Calculator, TrendingUp, PieChart, Calendar, PiggyBank, BarChart3 } from 'lucide-react';
 
 interface RetirementInputs {
-    currentAge: number;
-    retirementAge: number;
-    lifeExpectancy: number;
-    currentSavings: number;
-    monthlyContribution: number;
-    expectedReturn: number;
+    currentAge: string;
+    retirementAge: string;
+    lifeExpectancy: string;
+    currentSavings: string;
+    monthlyContribution: string;
+    expectedReturn: string;
     inflationRate: string;
-    monthlyExpenseToday: number;
+    monthlyExpenseToday: string;
 }
+
 
 const INFLATION_OPTIONS = [
     { year: '2024', rate: 5.4 },
@@ -23,16 +24,15 @@ const INFLATION_OPTIONS = [
 
 const RetirementCalc: React.FC = () => {
     const [inputs, setInputs] = useState<RetirementInputs>({
-        currentAge: 30,
-        retirementAge: 60,
-        lifeExpectancy: 80,
-        currentSavings: 500000,
-        monthlyContribution: 10000,
-        expectedReturn: 12,
+        currentAge: '',
+        retirementAge: '',
+        lifeExpectancy: '',
+        currentSavings: '',
+        monthlyContribution: '',
+        expectedReturn: '',
         inflationRate: '2024',
-        monthlyExpenseToday: 30000,
+        monthlyExpenseToday: '',
     });
-
     const [customInflation, setCustomInflation] = useState<number>(6);
 
     const handleChange = (field: keyof RetirementInputs, value: string) => {
@@ -64,31 +64,53 @@ const RetirementCalc: React.FC = () => {
     };
 
     const results = useMemo(() => {
+        // Check if all required fields are filled
+        const hasAllInputs =
+            inputs.currentAge !== '' &&
+            inputs.retirementAge !== '' &&
+            inputs.lifeExpectancy !== '' &&
+            inputs.currentSavings !== '' &&
+            inputs.monthlyContribution !== '' &&
+            inputs.expectedReturn !== '' &&
+            inputs.monthlyExpenseToday !== '';
+
+        if (!hasAllInputs) {
+            return null;
+        }
+
         const inflationRate = getInflationRate();
-        const yearsToRetirement = inputs.retirementAge - inputs.currentAge;
-        const yearsInRetirement = inputs.lifeExpectancy - inputs.retirementAge;
-        const monthlyRate = inputs.expectedReturn / 100 / 12;
+        const currentAge = Number(inputs.currentAge);
+        const retirementAge = Number(inputs.retirementAge);
+        const lifeExpectancy = Number(inputs.lifeExpectancy);
+        const currentSavings = Number(inputs.currentSavings);
+        const monthlyContribution = Number(inputs.monthlyContribution);
+        const expectedReturn = Number(inputs.expectedReturn);
+        const monthlyExpenseToday = Number(inputs.monthlyExpenseToday);
+
+        const yearsToRetirement = retirementAge - currentAge;
+        const yearsInRetirement = lifeExpectancy - retirementAge;
+        const monthlyRate = expectedReturn / 100 / 12;
         const months = yearsToRetirement * 12;
 
         // Future value of current savings
-        const fvCurrentSavings = inputs.currentSavings * Math.pow(1 + inputs.expectedReturn / 100, yearsToRetirement);
+        const fvCurrentSavings = currentSavings * Math.pow(1 + expectedReturn / 100, yearsToRetirement);
 
         // Future value of monthly contributions
         let fvContributions = 0;
         if (monthlyRate > 0) {
-            fvContributions = inputs.monthlyContribution * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
+            fvContributions = monthlyContribution * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
         } else {
-            fvContributions = inputs.monthlyContribution * months;
+            fvContributions = monthlyContribution * months;
         }
 
         const totalRetirementCorpus = fvCurrentSavings + fvContributions;
 
         // Calculate inflation-adjusted monthly expenses at retirement
-        const futureMonthlyExpense = inputs.monthlyExpenseToday * Math.pow(1 + inflationRate / 100, yearsToRetirement);
+        const futureMonthlyExpense = monthlyExpenseToday * Math.pow(1 + inflationRate / 100, yearsToRetirement);
         const annualExpenseAtRetirement = futureMonthlyExpense * 12;
 
         // Calculate required corpus for retirement
-        const realReturnRate = ((1 + inputs.expectedReturn / 100) / (1 + inflationRate / 100)) - 1;
+        const realReturnRate = ((1 + expectedReturn / 100) / (1 + inflationRate / 100)) - 1;
         const monthlyRealRate = realReturnRate / 12;
 
         let requiredCorpus = 0;
@@ -114,10 +136,10 @@ const RetirementCalc: React.FC = () => {
         }
 
         // Additional analytics
-        const totalInvested = inputs.monthlyContribution * months + inputs.currentSavings;
+        const totalInvested = monthlyContribution * months + currentSavings;
         const roi = ((totalRetirementCorpus - totalInvested) / totalInvested) * 100;
         const corpusMultiple = totalRetirementCorpus / totalInvested;
-        const monthlyIncomeAtRetirement = (totalRetirementCorpus * (inputs.expectedReturn / 100)) / 12;
+        const monthlyIncomeAtRetirement = (totalRetirementCorpus * (expectedReturn / 100)) / 12;
 
         return {
             totalRetirementCorpus,
@@ -296,214 +318,224 @@ const RetirementCalc: React.FC = () => {
 
                     {/* Results Section */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* Status Card */}
-                        <div className={`rounded-xl shadow-lg p-6 ${results.isOnTrack ? 'bg-gradient-to-r from-green-500 to-emerald-600' : 'bg-gradient-to-r from-orange-500 to-red-600'} text-white`}>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <TrendingUp className="w-8 h-8" />
-                                        <h2 className="text-2xl font-bold">
-                                            {results.isOnTrack ? 'Retirement Goal: Achievable' : 'Retirement Goal: Shortfall'}
-                                        </h2>
-                                    </div>
-                                    <p className="text-lg opacity-90">
-                                        {results.isOnTrack
-                                            ? 'You will have ' + formatCurrency(results.shortfall) + ' surplus at retirement'
-                                            : 'Additional ' + formatCurrency(results.shortfall) + ' required to meet your goals'}
-                                    </p>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-sm opacity-75">Coverage Ratio</div>
-                                    <div className="text-3xl font-bold">
-                                        {((results.totalRetirementCorpus / results.requiredCorpus) * 100).toFixed(0)}%
-                                    </div>
-                                </div>
+                        {!results ? (
+                            <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+                                <Calculator className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                                <h3 className="text-xl font-semibold text-gray-600 mb-2">Start Planning Your Retirement</h3>
+                                <p className="text-gray-500">Fill in all the input fields to see your retirement projections and recommendations</p>
                             </div>
-                        </div>
-
-                        {/* Recommended Actions Card - Prominent Position */}
-                        {!results.isOnTrack && (
-                            <div className="bg-white rounded-xl shadow-2xl p-6 border-l-4 border-orange-500">
-                                <div className="flex items-start gap-4">
-                                    <div className="bg-orange-100 p-3 rounded-full">
-                                        <TrendingUp className="w-6 h-6 text-orange-600" />
+                        ) : (
+                            <>
+                                {/* Status Card */}
+                                <div className={`rounded-xl shadow-lg p-6 ${results.isOnTrack ? 'bg-gradient-to-r from-green-500 to-emerald-600' : 'bg-gradient-to-r from-orange-500 to-red-600'} text-white`}>
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <TrendingUp className="w-8 h-8" />
+                                                <h2 className="text-2xl font-bold">
+                                                    {results.isOnTrack ? 'Retirement Goal: Achievable' : 'Retirement Goal: Shortfall'}
+                                                </h2>
+                                            </div>
+                                            <p className="text-lg opacity-90">
+                                                {results.isOnTrack
+                                                    ? 'You will have ' + formatCurrency(results.shortfall) + ' surplus at retirement'
+                                                    : 'Additional ' + formatCurrency(results.shortfall) + ' required to meet your goals'}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-sm opacity-75">Coverage Ratio</div>
+                                            <div className="text-3xl font-bold">
+                                                {((results.totalRetirementCorpus / results.requiredCorpus) * 100).toFixed(0)}%
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="flex-1">
-                                        <h3 className="text-xl font-bold text-gray-800 mb-2">Recommended Actions</h3>
-                                        <p className="text-gray-600 mb-4">To meet your retirement goal, consider the following options:</p>
+                                </div>
 
-                                        <div className="space-y-3">
-                                            <div className="bg-orange-50 p-4 rounded-lg">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="font-semibold text-gray-800">Option 1: Increase Monthly Investment</span>
-                                                    <span className="text-2xl font-bold text-orange-600">{formatCurrency(results.requiredMonthlyContribution)}</span>
+                                {/* Recommended Actions Card - Prominent Position */}
+                                {!results.isOnTrack && (
+                                    <div className="bg-white rounded-xl shadow-2xl p-6 border-l-4 border-orange-500">
+                                        <div className="flex items-start gap-4">
+                                            <div className="bg-orange-100 p-3 rounded-full">
+                                                <TrendingUp className="w-6 h-6 text-orange-600" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="text-xl font-bold text-gray-800 mb-2">Recommended Actions</h3>
+                                                <p className="text-gray-600 mb-4">To meet your retirement goal, consider the following options:</p>
+
+                                                <div className="space-y-3">
+                                                    <div className="bg-orange-50 p-4 rounded-lg">
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <span className="font-semibold text-gray-800">Option 1: Increase Monthly Investment</span>
+                                                            <span className="text-2xl font-bold text-orange-600">{formatCurrency(results.requiredMonthlyContribution)}</span>
+                                                        </div>
+                                                        <p className="text-sm text-gray-600">Increase from {formatCurrency(Number(inputs.monthlyContribution))} to {formatCurrency(results.requiredMonthlyContribution)} per month</p>
+                                                    </div>
+
+                                                    <div className="bg-blue-50 p-4 rounded-lg">
+                                                        <div className="font-semibold text-gray-800 mb-2">Option 2: Increase Expected Returns</div>
+                                                        <p className="text-sm text-gray-600">Consider allocating more to equity-oriented investments (mutual funds, stocks) for higher returns. Even a 1-2% increase in returns can significantly impact your corpus.</p>
+                                                    </div>
+
+                                                    <div className="bg-purple-50 p-4 rounded-lg">
+                                                        <div className="font-semibold text-gray-800 mb-2">Option 3: Reduce Post-Retirement Expenses</div>
+                                                        <p className="text-sm text-gray-600">Review your expected monthly expenses. Reducing expenses by {formatCurrency(Math.ceil((results.shortfall / results.yearsInRetirement) / 12))} per month can help bridge the gap.</p>
+                                                    </div>
                                                 </div>
-                                                <p className="text-sm text-gray-600">Increase from {formatCurrency(inputs.monthlyContribution)} to {formatCurrency(results.requiredMonthlyContribution)} per month</p>
-                                            </div>
-
-                                            <div className="bg-blue-50 p-4 rounded-lg">
-                                                <div className="font-semibold text-gray-800 mb-2">Option 2: Increase Expected Returns</div>
-                                                <p className="text-sm text-gray-600">Consider allocating more to equity-oriented investments (mutual funds, stocks) for higher returns. Even a 1-2% increase in returns can significantly impact your corpus.</p>
-                                            </div>
-
-                                            <div className="bg-purple-50 p-4 rounded-lg">
-                                                <div className="font-semibold text-gray-800 mb-2">Option 3: Reduce Post-Retirement Expenses</div>
-                                                <p className="text-sm text-gray-600">Review your expected monthly expenses. Reducing expenses by {formatCurrency(Math.ceil((results.shortfall / results.yearsInRetirement) / 12))} per month can help bridge the gap.</p>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        )}
+                                )}
 
-                        {/* Success Message for On Track */}
-                        {results.isOnTrack && (
-                            <div className="bg-white rounded-xl shadow-2xl p-6 border-l-4 border-green-500">
-                                <div className="flex items-start gap-4">
-                                    <div className="bg-green-100 p-3 rounded-full">
-                                        <TrendingUp className="w-6 h-6 text-green-600" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="text-xl font-bold text-gray-800 mb-2">Excellent Planning!</h3>
-                                        <p className="text-gray-600 mb-4">You're on track to exceed your retirement goals. Here are some tips to optimize further:</p>
-
-                                        <div className="space-y-3">
-                                            <div className="bg-green-50 p-4 rounded-lg">
-                                                <div className="font-semibold text-gray-800 mb-2">✓ Maintain Your Discipline</div>
-                                                <p className="text-sm text-gray-600">Continue your current investment strategy and avoid withdrawing from your retirement fund early.</p>
+                                {/* Success Message for On Track */}
+                                {results.isOnTrack && (
+                                    <div className="bg-white rounded-xl shadow-2xl p-6 border-l-4 border-green-500">
+                                        <div className="flex items-start gap-4">
+                                            <div className="bg-green-100 p-3 rounded-full">
+                                                <TrendingUp className="w-6 h-6 text-green-600" />
                                             </div>
+                                            <div className="flex-1">
+                                                <h3 className="text-xl font-bold text-gray-800 mb-2">Excellent Planning!</h3>
+                                                <p className="text-gray-600 mb-4">You're on track to exceed your retirement goals. Here are some tips to optimize further:</p>
 
-                                            <div className="bg-blue-50 p-4 rounded-lg">
-                                                <div className="font-semibold text-gray-800 mb-2">✓ Review Annually</div>
-                                                <p className="text-sm text-gray-600">Reassess your retirement plan yearly as your income, expenses, and goals may change.</p>
-                                            </div>
+                                                <div className="space-y-3">
+                                                    <div className="bg-green-50 p-4 rounded-lg">
+                                                        <div className="font-semibold text-gray-800 mb-2">✓ Maintain Your Discipline</div>
+                                                        <p className="text-sm text-gray-600">Continue your current investment strategy and avoid withdrawing from your retirement fund early.</p>
+                                                    </div>
 
-                                            <div className="bg-purple-50 p-4 rounded-lg">
-                                                <div className="font-semibold text-gray-800 mb-2">✓ Consider Additional Goals</div>
-                                                <p className="text-sm text-gray-600">With a surplus of {formatCurrency(results.shortfall)}, you could plan for legacy, travel, or supporting family members.</p>
+                                                    <div className="bg-blue-50 p-4 rounded-lg">
+                                                        <div className="font-semibold text-gray-800 mb-2">✓ Review Annually</div>
+                                                        <p className="text-sm text-gray-600">Reassess your retirement plan yearly as your income, expenses, and goals may change.</p>
+                                                    </div>
+
+                                                    <div className="bg-purple-50 p-4 rounded-lg">
+                                                        <div className="font-semibold text-gray-800 mb-2">✓ Consider Additional Goals</div>
+                                                        <p className="text-sm text-gray-600">With a surplus of {formatCurrency(results.shortfall)}, you could plan for legacy, travel, or supporting family members.</p>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                )}
+
+                                {/* Key Metrics Grid */}
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div className="bg-white rounded-xl shadow-lg p-5">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h3 className="text-sm font-semibold text-gray-600 uppercase">Projected Corpus</h3>
+                                            <PieChart className="w-5 h-5 text-indigo-600" />
+                                        </div>
+                                        <div className="text-3xl font-bold text-indigo-600">
+                                            {formatCurrency(results.totalRetirementCorpus)}
+                                        </div>
+                                        <div className="text-xs text-gray-500 mt-2">At age {inputs.retirementAge}</div>
+                                    </div>
+
+                                    <div className="bg-white rounded-xl shadow-lg p-5">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h3 className="text-sm font-semibold text-gray-600 uppercase">Required Corpus</h3>
+                                            <BarChart3 className="w-5 h-5 text-purple-600" />
+                                        </div>
+                                        <div className="text-3xl font-bold text-purple-600">
+                                            {formatCurrency(results.requiredCorpus)}
+                                        </div>
+                                        <div className="text-xs text-gray-500 mt-2">For {results.yearsInRetirement} years</div>
+                                    </div>
+
+                                    <div className="bg-white rounded-xl shadow-lg p-5">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h3 className="text-sm font-semibold text-gray-600 uppercase">Total Investment</h3>
+                                            <PiggyBank className="w-5 h-5 text-blue-600" />
+                                        </div>
+                                        <div className="text-3xl font-bold text-blue-600">
+                                            {formatCurrency(results.totalInvested)}
+                                        </div>
+                                        <div className="text-xs text-gray-500 mt-2">Principal amount</div>
+                                    </div>
+
+                                    <div className="bg-white rounded-xl shadow-lg p-5">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h3 className="text-sm font-semibold text-gray-600 uppercase">Investment Gains</h3>
+                                            <TrendingUp className="w-5 h-5 text-green-600" />
+                                        </div>
+                                        <div className="text-3xl font-bold text-green-600">
+                                            {formatCurrency(results.investmentGains)}
+                                        </div>
+                                        <div className="text-xs text-gray-500 mt-2">Returns on investment</div>
+                                    </div>
                                 </div>
-                            </div>
+
+                                {/* Detailed Analytics */}
+                                <div className="bg-white rounded-xl shadow-lg p-6">
+                                    <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4 border-b pb-2">
+                                        <BarChart3 className="w-5 h-5 text-indigo-600" />
+                                        Detailed Analysis
+                                    </h3>
+
+                                    <div className="grid md:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+                                        <div className="flex justify-between py-2 border-b border-gray-100">
+                                            <span className="text-gray-600">Years to Retirement</span>
+                                            <span className="font-semibold text-gray-800">{results.yearsToRetirement} years</span>
+                                        </div>
+
+                                        <div className="flex justify-between py-2 border-b border-gray-100">
+                                            <span className="text-gray-600">Years in Retirement</span>
+                                            <span className="font-semibold text-gray-800">{results.yearsInRetirement} years</span>
+                                        </div>
+
+                                        <div className="flex justify-between py-2 border-b border-gray-100">
+                                            <span className="text-gray-600">Return on Investment (ROI)</span>
+                                            <span className="font-semibold text-green-600">{formatPercent(results.roi)}</span>
+                                        </div>
+
+                                        <div className="flex justify-between py-2 border-b border-gray-100">
+                                            <span className="text-gray-600">Corpus Multiple</span>
+                                            <span className="font-semibold text-gray-800">{results.corpusMultiple.toFixed(2)}x</span>
+                                        </div>
+
+                                        <div className="flex justify-between py-2 border-b border-gray-100">
+                                            <span className="text-gray-600">Inflation Rate Applied</span>
+                                            <span className="font-semibold text-gray-800">{formatPercent(results.inflationRate)}</span>
+                                        </div>
+
+                                        <div className="flex justify-between py-2 border-b border-gray-100">
+                                            <span className="text-gray-600">Real Return Rate</span>
+                                            <span className="font-semibold text-gray-800">{formatPercent(results.realReturnRate)}</span>
+                                        </div>
+
+                                        <div className="flex justify-between py-2 border-b border-gray-100">
+                                            <span className="text-gray-600">FV of Current Savings</span>
+                                            <span className="font-semibold text-gray-800">{formatCurrency(results.fvCurrentSavings)}</span>
+                                        </div>
+
+                                        <div className="flex justify-between py-2 border-b border-gray-100">
+                                            <span className="text-gray-600">FV of Future Contributions</span>
+                                            <span className="font-semibold text-gray-800">{formatCurrency(results.fvContributions)}</span>
+                                        </div>
+
+                                        <div className="flex justify-between py-2 border-b border-gray-100">
+                                            <span className="text-gray-600">Monthly Expense at Retirement</span>
+                                            <span className="font-semibold text-gray-800">{formatCurrency(results.futureMonthlyExpense)}</span>
+                                        </div>
+
+                                        <div className="flex justify-between py-2 border-b border-gray-100">
+                                            <span className="text-gray-600">Annual Expense at Retirement</span>
+                                            <span className="font-semibold text-gray-800">{formatCurrency(results.annualExpenseAtRetirement)}</span>
+                                        </div>
+
+                                        <div className="flex justify-between py-2 border-b border-gray-100">
+                                            <span className="text-gray-600">Monthly Income from Corpus</span>
+                                            <span className="font-semibold text-blue-600">{formatCurrency(results.monthlyIncomeAtRetirement)}</span>
+                                        </div>
+
+                                        <div className="flex justify-between py-2 border-b border-gray-100">
+                                            <span className="text-gray-600">Total Investment Period</span>
+                                            <span className="font-semibold text-gray-800">{results.yearsToRetirement * 12} months</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
                         )}
-
-                        {/* Key Metrics Grid */}
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div className="bg-white rounded-xl shadow-lg p-5">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-sm font-semibold text-gray-600 uppercase">Projected Corpus</h3>
-                                    <PieChart className="w-5 h-5 text-indigo-600" />
-                                </div>
-                                <div className="text-3xl font-bold text-indigo-600">
-                                    {formatCurrency(results.totalRetirementCorpus)}
-                                </div>
-                                <div className="text-xs text-gray-500 mt-2">At age {inputs.retirementAge}</div>
-                            </div>
-
-                            <div className="bg-white rounded-xl shadow-lg p-5">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-sm font-semibold text-gray-600 uppercase">Required Corpus</h3>
-                                    <BarChart3 className="w-5 h-5 text-purple-600" />
-                                </div>
-                                <div className="text-3xl font-bold text-purple-600">
-                                    {formatCurrency(results.requiredCorpus)}
-                                </div>
-                                <div className="text-xs text-gray-500 mt-2">For {results.yearsInRetirement} years</div>
-                            </div>
-
-                            <div className="bg-white rounded-xl shadow-lg p-5">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-sm font-semibold text-gray-600 uppercase">Total Investment</h3>
-                                    <PiggyBank className="w-5 h-5 text-blue-600" />
-                                </div>
-                                <div className="text-3xl font-bold text-blue-600">
-                                    {formatCurrency(results.totalInvested)}
-                                </div>
-                                <div className="text-xs text-gray-500 mt-2">Principal amount</div>
-                            </div>
-
-                            <div className="bg-white rounded-xl shadow-lg p-5">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-sm font-semibold text-gray-600 uppercase">Investment Gains</h3>
-                                    <TrendingUp className="w-5 h-5 text-green-600" />
-                                </div>
-                                <div className="text-3xl font-bold text-green-600">
-                                    {formatCurrency(results.investmentGains)}
-                                </div>
-                                <div className="text-xs text-gray-500 mt-2">Returns on investment</div>
-                            </div>
-                        </div>
-
-                        {/* Detailed Analytics */}
-                        <div className="bg-white rounded-xl shadow-lg p-6">
-                            <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4 border-b pb-2">
-                                <BarChart3 className="w-5 h-5 text-indigo-600" />
-                                Detailed Analysis
-                            </h3>
-
-                            <div className="grid md:grid-cols-2 gap-x-8 gap-y-3 text-sm">
-                                <div className="flex justify-between py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Years to Retirement</span>
-                                    <span className="font-semibold text-gray-800">{results.yearsToRetirement} years</span>
-                                </div>
-
-                                <div className="flex justify-between py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Years in Retirement</span>
-                                    <span className="font-semibold text-gray-800">{results.yearsInRetirement} years</span>
-                                </div>
-
-                                <div className="flex justify-between py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Return on Investment (ROI)</span>
-                                    <span className="font-semibold text-green-600">{formatPercent(results.roi)}</span>
-                                </div>
-
-                                <div className="flex justify-between py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Corpus Multiple</span>
-                                    <span className="font-semibold text-gray-800">{results.corpusMultiple.toFixed(2)}x</span>
-                                </div>
-
-                                <div className="flex justify-between py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Inflation Rate Applied</span>
-                                    <span className="font-semibold text-gray-800">{formatPercent(results.inflationRate)}</span>
-                                </div>
-
-                                <div className="flex justify-between py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Real Return Rate</span>
-                                    <span className="font-semibold text-gray-800">{formatPercent(results.realReturnRate)}</span>
-                                </div>
-
-                                <div className="flex justify-between py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">FV of Current Savings</span>
-                                    <span className="font-semibold text-gray-800">{formatCurrency(results.fvCurrentSavings)}</span>
-                                </div>
-
-                                <div className="flex justify-between py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">FV of Future Contributions</span>
-                                    <span className="font-semibold text-gray-800">{formatCurrency(results.fvContributions)}</span>
-                                </div>
-
-                                <div className="flex justify-between py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Monthly Expense at Retirement</span>
-                                    <span className="font-semibold text-gray-800">{formatCurrency(results.futureMonthlyExpense)}</span>
-                                </div>
-
-                                <div className="flex justify-between py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Annual Expense at Retirement</span>
-                                    <span className="font-semibold text-gray-800">{formatCurrency(results.annualExpenseAtRetirement)}</span>
-                                </div>
-
-                                <div className="flex justify-between py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Monthly Income from Corpus</span>
-                                    <span className="font-semibold text-blue-600">{formatCurrency(results.monthlyIncomeAtRetirement)}</span>
-                                </div>
-
-                                <div className="flex justify-between py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Total Investment Period</span>
-                                    <span className="font-semibold text-gray-800">{results.yearsToRetirement * 12} months</span>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
