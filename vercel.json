@@ -1,15 +1,34 @@
 {
   "rewrites": [
-    { "source": "/about", "destination": "/" },
-    { "source": "/privacy-policy", "destination": "/" },
-    { "source": "/terms", "destination": "/" },
-    { "source": "/contact", "destination": "/" }
+    {
+      "source": "/about",
+      "destination": "/"
+    },
+    {
+      "source": "/privacy-policy",
+      "destination": "/"
+    },
+    {
+      "source": "/terms",
+      "destination": "/"
+    },
+    {
+      "source": "/contact",
+      "destination": "/"
+    },
+    {
+      "source": "/retirement-calculator",
+      "destination": "/"
+    }
   ],
   "headers": [
     {
       "source": "/sitemap.xml",
       "headers": [
-        { "key": "Content-Type", "value": "application/xml" }
+        {
+          "key": "Content-Type",
+          "value": "application/xml"
+        }
       ]
     }
   ]
