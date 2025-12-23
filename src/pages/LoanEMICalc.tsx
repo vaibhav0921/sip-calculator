@@ -89,11 +89,7 @@ const formatIndianCurrency = (amount: number) => {
     }
     return '₹' + lastThree;
 };
-type ValidationErrors = {
-    loanAmount?: string;
-    interestRate?: string;
-    tenure?: string;
-};
+
 const LoanEmiCalculator = () => {
     // State management
     const [loanType, setLoanType] = useState<LoanType>('home');
