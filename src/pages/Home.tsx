@@ -750,9 +750,9 @@ const Home = () => {
                 <h3 className="font-semibold text-gray-800">Retirement Calculator</h3>
                 <p className="text-sm text-gray-600 mt-1">Plan your retirement corpus</p>
               </a>
-              <a href="/tax-calculator" className="p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition">
-                <h3 className="font-semibold text-gray-800">Tax Calculator</h3>
-                <p className="text-sm text-gray-600 mt-1">Calculate tax on mutual fund gains</p>
+              <a href="/loanEMI-calculator" className="p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition">
+                <h3 className="font-semibold text-gray-800">Loan EMI Calculator</h3>
+                <p className="text-sm text-gray-600 mt-1">Calculate monthly EMI</p>
               </a>
             </div>
           </section>

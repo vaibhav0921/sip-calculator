@@ -23,6 +23,10 @@
     {
       "source": "/incometax-calculator",
       "destination": "/"
+    },
+    {
+      "source": "/loanEMI-calculator",
+      "destination": "/"
     }
   ],
   "headers": [

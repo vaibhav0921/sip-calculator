@@ -7,6 +7,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import RetirementCalc from "./pages/RetirementCalc";
 import IncomeTaxCalculator from "./pages/IncomeTaxCalculator";
+import LoanEmiCalculator from "./pages/LoanEMICalc";
 const App: React.FC = () => {
   return (
     <BrowserRouter>
@@ -18,6 +19,7 @@ const App: React.FC = () => {
         <Route path="/terms" element={<Terms />} />
         <Route path="/retirement-calculator" element={<RetirementCalc />} />
         <Route path="/incometax-calculator" element={<IncomeTaxCalculator />} />
+        <Route path="/loanEMI-calculator" element={<LoanEmiCalculator />} />
       </Routes>
       <Analytics />
     </BrowserRouter>
