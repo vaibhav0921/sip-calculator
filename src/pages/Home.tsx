@@ -744,7 +744,7 @@ const Home = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <a href="/incometax-calculator" className="p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition">
                 <h3 className="font-semibold text-gray-800">IncomeTax Calculator</h3>
-                <p className="text-sm text-gray-600 mt-1">Calculate one-time investment returns</p>
+                <p className="text-sm text-gray-600 mt-1">Calculate income tax as per new regime</p>
               </a>
               <a href="/retirement-calculator" className="p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition">
                 <h3 className="font-semibold text-gray-800">Retirement Calculator</h3>
