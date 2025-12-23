@@ -1,38 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://sip-calculator-zeta.vercel.app/</loc>
+    <loc>https://www.fincalcs.pro/</loc>
     <lastmod>2025-01-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://sip-calculator-zeta.vercel.app/about</loc>
+    <loc>https://www.fincalcs.pro/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://sip-calculator-zeta.vercel.app/privacy-policy</loc>
+    <loc>https://www.fincalcs.pro/privacy-policy</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://sip-calculator-zeta.vercel.app/terms</loc>
+    <loc>https://www.fincalcs.pro/terms</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://sip-calculator-zeta.vercel.app/contact</loc>
+    <loc>https://www.fincalcs.pro/contact</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://sip-calculator-zeta.vercel.app//retirement-calculator</loc>
+    <loc>https://www.fincalcs.pro/retirement-calculator</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://www.fincalcs.pro/incometax-calculatorr</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://www.fincalcs.pro/loanEMI-calculator</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
